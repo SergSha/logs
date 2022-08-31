@@ -1,0 +1,85 @@
+---
+# tasks file for logs
+
+# Настраиваем на всех хостах одинаковое время
+- name: Setup Moscow timezone
+  command: cp -f /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+  notify:
+    - Chronyd Restart
+
+- block: # ----- Web-Server ----
+
+# Подключаем EPEL репозиторий с дополнительными пакетами
+  - name: Logs | Install EPEL Repo package from standart repo
+    yum: name=epel-release state=present
+    tags:
+      - epel-package
+      - packages
+
+# Устанавливаем nginx
+  - name: Logs | Install Nginx
+    yum: name=nginx state=present
+    tags:
+      - nginx-package
+      - packages
+
+# Корректируем Nginx конфиг файл /etc/nginx/nginx.conf
+  - block:
+    - name: Edit nginx config file /etc/nginx/nginx.conf
+      lineinfile: 
+        dest: /etc/nginx/nginx.conf
+        regexp: '^error_log /var/log/nginx/error.log;'
+        insertafter: error_log /var/log/nginx/error.log;
+        line: "error_log syslog:server=192.168.50.15:514,tag=nginx_error;"
+    - name: Edit nginx config file /etc/nginx/nginx.conf
+      lineinfile: 
+        dest: /etc/nginx/nginx.conf
+        regexp: '^    access_log  /var/log/nginx/access.log  main;'
+        insertafter: '    access_log  /var/log/nginx/access.log  main;'
+        line: "    access_log syslog:server=192.168.50.15:514,tag=nginx_access,severity=info combined;"
+      notify:
+        - Nginx Start and Enable
+    tags:
+      - nginx-conf
+
+  when: ansible_hostname == "web"
+
+- block: # ----- Log-Server ----
+
+# Вносим изменения файл /etc/rsyslog.conf
+  - block:
+    - name: Edit Rsyslog config file /etc/rsyslog.conf
+      replace: 
+        path: /etc/rsyslog.conf
+        regexp: '^#\$ModLoad imudp'
+        replace: $ModLoad imudp
+    - name: Edit Rsyslog config file /etc/rsyslog.conf
+      replace: 
+        path: /etc/rsyslog.conf
+        regexp: '^#\$UDPServerRun 514'
+        replace: $UDPServerRun 514
+    - name: Edit Rsyslog config file /etc/rsyslog.conf
+      replace: 
+        path: /etc/rsyslog.conf
+        regexp: '^#\$ModLoad imtcp'
+        replace: $ModLoad imtcp
+    - name: Edit Rsyslog config file /etc/rsyslog.conf
+      replace: 
+        path: /etc/rsyslog.conf
+        regexp: '^#\$InputTCPServerRun 514'
+        replace: $InputTCPServerRun 514
+    tags:
+      - rsyslog-conf
+
+  - name: Edit Rsyslog config file /etc/rsyslog.conf
+    lineinfile: 
+      dest: /etc/rsyslog.conf
+      regexp: '^'
+      insertafter: EOF
+      line: "\n# Add remote logs\n$template RemoteLogs,\"/var/log/rsyslog/%HOSTNAME%/%PROGRAMNAME%.log\"\n*.* ?RemoteLogs"
+      state: present
+    notify:
+      - Rsyslog Restart
+
+  when: ansible_hostname == "log"
+

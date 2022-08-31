@@ -1,0 +1,7 @@
+---
+- name: Logs | Install and Configure
+  hosts: all
+  become: true
+
+  roles:
+    - { role: logs, when: ansible_system == 'Linux' }

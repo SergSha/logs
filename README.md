@@ -137,7 +137,7 @@ Hint: Some lines were ellipsized, use -l to show in full.
 Wed Aug 31 10:25:30 MSK 2022
 [root@web ~]#</pre>
 
-<p>Аналогичным образом настрогим на сервере log.</p>
+<p>Аналогичным образом настроим на сервере log.</p>
 
 <p>Откроем ещё одно окно терминала и подключимся по ssh к серверу log:</p>
 

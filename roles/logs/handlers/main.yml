@@ -1,0 +1,12 @@
+---
+# handlers file for logs
+
+- name: Chronyd Restart
+  service: name=chronyd.service state=restarted
+
+- name: Nginx Start and Enable
+  service: name=nginx.service state=started enabled=yes
+
+- name: Rsyslog Restart
+  service: name=rsyslog.service state=restarted
+
