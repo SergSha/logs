@@ -566,24 +566,167 @@ Aug 31 12:24:16 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:24:16 +0300]
 
 [root@log ~]#</pre>
 
+<pre>[root@log ~]# cat /var/log/rsyslog/web/nginx_error.log
+Aug 31 12:11:10 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:10 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
+Aug 31 12:11:15 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:15 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
+Aug 31 12:11:19 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:19 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
 
+Aug 31 12:23:39 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:23:39 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
+Aug 31 12:24:09 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:24:09 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
+Aug 31 12:24:16 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:24:16 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
 
+[root@log ~]#</pre>
 
+<p>Видим, что логи отправляются корректно.</p>
 
+<h4>4. Настройка аудита, контролирующего изменения конфигурации nginx</h4>
 
+<p>За аудит отвечает утилита auditd, в RHEL-based системах обычно он уже предустановлен.<br />
+Проверим это:</p>
 
+<pre>[root@web ~]# rpm -qa | grep audit
+audit-2.8.5-4.el7.x86_64
+audit-libs-2.8.5-4.el7.x86_64
+[root@web ~]#</pre>
 
+<p>Настроим аудит изменения конфигурации nginx:<br />
+Добавим правило, которое будет отслеживать изменения в конфигруации nginx. Для этого в конец файла /etc/audit/rules.d/audit.rules добавим следующие строки:</p>
 
+<pre>[root@web ~]# vi /etc/audit/rules.d/audit.rules</pre>
 
+<pre>-w /etc/nginx/nginx.conf -p wa -k nginx_conf
+-w /etc/nginx/default.d/ -p wa -k nginx_conf</pre>
 
+<p>Данные правила позволяют контролировать запись (w) и измения атрибутов (a) в:</p>
 
+<ul>
+<li>/etc/nginx/nginx.conf</li>
+<li>Всех файлов каталога /etc/nginx/default.d/</li>
+</ul>
 
+<p>Для более удобного поиска к событиям добавляется метка nginx_conf</p>
 
+<p>Перезапускаем службу auditd:</p>
 
+<pre>[root@web ~]# service auditd restart
+Stopping logging:                                          [  OK  ]
+Redirecting start to /bin/systemctl start auditd.service
+[root@web ~]#</pre>
 
+<p>После данных изменений у нас начнут локально записываться логи аудита. Чтобы проверить, что логи аудита начали записываться локально, нужно внести изменения в файл /etc/nginx/nginx.conf или поменять его атрибут, например, добавим комментарий:</p>
 
+<pre>[root@web ~]# echo "Welcome to NGINX" >> /etc/nginx/nginx.conf
+[root@web ~]#</pre>
 
+потом посмотреть информацию об изменениях:</p>
 
+<pre>[root@web ~]# ausearch -f /etc/nginx/nginx.conf
+----
+time->Wed Aug 31 15:43:07 2022
+type=PROCTITLE msg=audit(1661949787.393:1191): proctitle="-bash"
+type=PATH msg=audit(1661949787.393:1191): item=1 name="/etc/nginx/nginx.conf" inode=100676834 dev=08:01 mode=0100644 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:httpd_config_t:s0 objtype=NORMAL cap_fp=0000000000000000 cap_fi=0000000000000000 cap_fe=0 cap_fver=0
+type=PATH msg=audit(1661949787.393:1191): item=0 name="/etc/nginx/" inode=100668984 dev=08:01 mode=040755 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:httpd_config_t:s0 objtype=PARENT cap_fp=0000000000000000 cap_fi=0000000000000000 cap_fe=0 cap_fver=0
+type=CWD msg=audit(1661949787.393:1191):  cwd="/root"
+type=SYSCALL msg=audit(1661949787.393:1191): arch=c000003e syscall=2 success=yes exit=3 a0=a9ab00 a1=441 a2=1b6 a3=fffffff0 items=2 ppid=22656 pid=22658 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=14 comm="bash" exe="/usr/bin/bash" subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 key="nginx_conf"
+[root@web ~]#</pre>
 
+<p>Также можно воспользоваться поиском по файлу /var/log/audit/audit.log, указав наш тэг "nginx_conf":</p>
 
+<pre>[root@web ~]# grep nginx_conf /var/log/audit/audit.log
+type=CONFIG_CHANGE msg=audit(1661948979.587:1188): auid=4294967295 ses=4294967295 subj=system_u:system_r:unconfined_service_t:s0 op=add_rule key="nginx_conf" list=4 res=1
+type=CONFIG_CHANGE msg=audit(1661948979.587:1189): auid=4294967295 ses=4294967295 subj=system_u:system_r:unconfined_service_t:s0 op=add_rule key="nginx_conf" list=4 res=1
+type=SYSCALL msg=audit(1661949787.393:1191): arch=c000003e syscall=2 success=yes exit=3 a0=a9ab00 a1=441 a2=1b6 a3=fffffff0 items=2 ppid=22656 pid=22658 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=14 comm="bash" exe="/usr/bin/bash" subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 key="nginx_conf"
+[root@web ~]#</pre>
 
+<p>Далее настроим пересылку логов на удаленный сервер. Auditd по умолчанию не умеет пересылать логи, для пересылки на сервере web потребуется установить пакет audispd-plugins:</p>
+
+<pre>[root@web ~]# yum install -y audispd-plugins
+...
+Installed:
+  audispd-plugins.x86_64 0:2.8.5-4.el7
+
+Complete!
+[root@web ~]#</pre>
+
+<p>Найдем и поменяем следующие строки в файле /etc/audit/auditd.conf:</p>
+
+<pre>[root@web ~]# vi /etc/audit/auditd.conf</pre>
+
+<pre>...
+log_format = RAW
+...
+name_format = HOSTNAME
+...</pre>
+
+<p>В файле /etc/audisp/plugins.d/au-remote.conf поменяем параметр active на yes:</p>
+
+<pre>active = yes
+direction = out
+path = /sbin/audisp-remote
+type = always
+#args =
+format = string</pre>
+
+<p>В файле /etc/audisp/audisp-remote.conf требуется указать адрес сервера и порт, на который будут отправляться логи:<p>
+
+<pre>[root@web ~]# vi /etc/audisp/audisp-remote.conf</pre>
+
+<pre>remote_server = 192.168.50.15
+port = 60
+...</pre>
+
+<p>Далее перезапускаем службу auditd:</p>
+
+<pre>[root@web ~]# service auditd restart
+Stopping logging:                                          [  OK  ]
+Redirecting start to /bin/systemctl start auditd.service
+[root@web ~]#</pre>
+
+<p>На этом настройка web-сервера завершена.</p>
+
+<p>Далее настроим log-сервер.</p>
+
+<p>Отроем порт TCP 60, для этого уберем значки комментария в файле /etc/audit/auditd.conf:</p>
+
+<pre>[root@log ~]# vi /etc/audit/auditd.conf</pre>
+
+<pre>...
+tcp_listen_port = 60
+...</pre>
+
+<p>Перезапускаем службу auditd:</p>
+
+<pre>[root@log ~]# service auditd restart
+Stopping logging:                                          [  OK  ]
+Redirecting start to /bin/systemctl start auditd.service
+[root@log ~]#</pre>
+
+<p>На этом настройка пересылки логов аудита закончена. Можем попробовать поменять атрибут у файла /etc/nginx/nginx.conf:</p>
+
+<pre>[root@web ~]# ls -l /etc/nginx/nginx.conf
+-rw-r--r--. 1 root root 2500 Aug 31 15:43 /etc/nginx/nginx.conf
+[root@web ~]# chmod +x /etc/nginx/nginx.conf
+[root@web ~]# ls -l /etc/nginx/nginx.conf
+-rwxr-xr-x. 1 root root 2500 Aug 31 15:43 /etc/nginx/nginx.conf
+[root@web ~]#</pre>
+
+<p>и проверить на log-сервере, что пришла информация об изменении атрибута:</p>
+
+<pre>[root@log ~]# ausearch -f /etc/nginx/nginx.conf
+----
+time->Wed Aug 31 16:20:36 2022
+node=web type=PROCTITLE msg=audit(1661952036.495:1247): proctitle=63686D6F64002B78002F6574632F6E67696E782F6E67696E782E636F6E66
+node=web type=PATH msg=audit(1661952036.495:1247): item=0 name="/etc/nginx/nginx.conf" inode=100676834 dev=08:01 mode=0100644 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:httpd_config_t:s0 objtype=NORMAL cap_fp=0000000000000000 cap_fi=0000000000000000 cap_fe=0 cap_fver=0
+node=web type=CWD msg=audit(1661952036.495:1247):  cwd="/root"
+node=web type=SYSCALL msg=audit(1661952036.495:1247): arch=c000003e syscall=268 success=yes exit=0 a0=ffffffffffffff9c a1=1f4d0f0 a2=1ed a3=7ffd489e7560 items=1 ppid=23037 pid=23064 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=16 comm="chmod" exe="/usr/bin/chmod" subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 key="nginx_conf"
+[root@log ~]#</pre>
+
+<pre>[root@log ~]# grep nginx_conf /var/log/audit/audit.log
+node=web type=CONFIG_CHANGE msg=audit(1661951433.336:1204): auid=4294967295 ses=4294967295 subj=system_u:system_r:unconfined_service_t:s0 op=remove_rule key="nginx_conf" list=4 res=1
+node=web type=CONFIG_CHANGE msg=audit(1661951433.341:1205): auid=4294967295 ses=4294967295 subj=system_u:system_r:unconfined_service_t:s0 op=remove_rule key="nginx_conf" list=4 res=1
+node=web type=CONFIG_CHANGE msg=audit(1661951433.345:1208): auid=4294967295 ses=4294967295 subj=system_u:system_r:unconfined_service_t:s0 op=add_rule key="nginx_conf" list=4 res=1
+node=web type=CONFIG_CHANGE msg=audit(1661951433.345:1209): auid=4294967295 ses=4294967295 subj=system_u:system_r:unconfined_service_t:s0 op=add_rule key="nginx_conf" list=4 res=1
+node=web type=SYSCALL msg=audit(1661952036.495:1247): arch=c000003e syscall=268 success=yes exit=0 a0=ffffffffffffff9c a1=1f4d0f0 a2=1ed a3=7ffd489e7560 items=1 ppid=23037 pid=23064 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=16 comm="chmod" exe="/usr/bin/chmod" subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 key="nginx_conf"
+[root@log ~]#</pre>
+
+<p>Как видим, log-сервер получает от web-сервера логи сервиса nginx и аудита, следящий за изменением конфигов nginx, что в итоге мы настроили сервер для сбора логов, в частности, работы сервиса и изменения конфигурации nginx.</p>
