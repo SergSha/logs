@@ -80,7 +80,7 @@
       backrefs: yes
       
 # В файле /etc/audisp/audisp-remote.conf требуется указать адрес сервера и порт, на который будут отправляться логи
-  - name: Edit Audit-plugins config file /etc/audisp/audisp-remote.conf
+  - name: Edit Audit-remote config file /etc/audisp/audisp-remote.conf
     lineinfile: 
       path: /etc/audisp/audisp-remote.conf
       regexp: '^(.*)remote_server(.*)$'
@@ -128,10 +128,11 @@
     
 # Отроем порт TCP 60, для этого уберем значки комментария в файле /etc/audit/auditd.conf
   - name: Edit Audit config file /etc/audit/auditd.conf
-    replace: 
+    lineinfile: 
       path: /etc/audit/auditd.conf
-      regexp: '^#tcp_listen_port = 60'
-      replace: tcp_listen_port = 60
+      regexp: '^(.*)#tcp_listen_port = 60(.*)$'
+      line: 'tcp_listen_port = 60'
+      backrefs: yes
     notify:
       - Auditd Restart
 
