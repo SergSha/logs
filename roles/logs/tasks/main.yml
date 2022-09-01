@@ -23,63 +23,113 @@
       - nginx-package
       - packages
 
-# Корректируем Nginx конфиг файл /etc/nginx/nginx.conf
+# Вносим изменеия в nginx конфиг файл /etc/nginx/nginx.conf
   - block:
     - name: Edit nginx config file /etc/nginx/nginx.conf
       lineinfile: 
         dest: /etc/nginx/nginx.conf
-        regexp: '^error_log /var/log/nginx/error.log;'
         insertafter: error_log /var/log/nginx/error.log;
         line: "error_log syslog:server=192.168.50.15:514,tag=nginx_error;"
+        
     - name: Edit nginx config file /etc/nginx/nginx.conf
       lineinfile: 
         dest: /etc/nginx/nginx.conf
-        regexp: '^    access_log  /var/log/nginx/access.log  main;'
         insertafter: '    access_log  /var/log/nginx/access.log  main;'
         line: "    access_log syslog:server=192.168.50.15:514,tag=nginx_access,severity=info combined;"
       notify:
         - Nginx Start and Enable
     tags:
       - nginx-conf
+      
+# Устанавливаем audispd-plugins
+  - name: Logs | Audispd-plugins
+    yum: name=audispd-plugins state=present
+    tags:
+      - audispd-plugins
+      - packages
+
+# Добавим правило, которое будет отслеживать изменения в конфигруации nginx
+  - name: Add rules for tracking nginx config
+    lineinfile: 
+      dest: /etc/audit/rules.d/audit.rules
+      insertafter: EOF
+      line: "\n-w /etc/nginx/nginx.conf -p wa -k nginx_conf\n-w /etc/nginx/default.d/ -p wa -k nginx_conf"
+      state: present
+
+# Найдем и поменяем следующие строки в файле /etc/audit/auditd.conf    
+  - name: Edit Audit config file /etc/audit/auditd.conf
+    replace: 
+      path: /etc/audit/auditd.conf
+      regexp: '^log_format'
+      replace: log_format = RAW
+
+  - name: Edit Audit config file /etc/audit/auditd.conf
+    replace: 
+      path: /etc/audit/auditd.conf
+      regexp: '^name_format'
+      replace: name_format = HOSTNAME
+
+# В файле /etc/audisp/plugins.d/au-remote.conf поменяем параметр active на yes
+  - name: Edit Audit-plugins config file /etc/audisp/plugins.d/au-remote.conf
+    replace: 
+      path: /etc/audisp/plugins.d/au-remote.conf
+      regexp: '^active = no'
+      replace: active = yes
+      
+# В файле /etc/audisp/audisp-remote.conf требуется указать адрес сервера и порт, на который будут отправляться логи
+  - name: Edit Audit-plugins config file /etc/audisp/audisp-remote.conf
+    replace: 
+      path: /etc/audisp/audisp-remote.conf
+      regexp: '^remote_server'
+      replace: remote_server = 192.168.50.15
+    notify: Auditd Restart
 
   when: ansible_hostname == "web"
 
 - block: # ----- Log-Server ----
 
 # Вносим изменения файл /etc/rsyslog.conf
-  - block:
-    - name: Edit Rsyslog config file /etc/rsyslog.conf
-      replace: 
-        path: /etc/rsyslog.conf
-        regexp: '^#\$ModLoad imudp'
-        replace: $ModLoad imudp
-    - name: Edit Rsyslog config file /etc/rsyslog.conf
-      replace: 
-        path: /etc/rsyslog.conf
-        regexp: '^#\$UDPServerRun 514'
-        replace: $UDPServerRun 514
-    - name: Edit Rsyslog config file /etc/rsyslog.conf
-      replace: 
-        path: /etc/rsyslog.conf
-        regexp: '^#\$ModLoad imtcp'
-        replace: $ModLoad imtcp
-    - name: Edit Rsyslog config file /etc/rsyslog.conf
-      replace: 
-        path: /etc/rsyslog.conf
-        regexp: '^#\$InputTCPServerRun 514'
-        replace: $InputTCPServerRun 514
-    tags:
-      - rsyslog-conf
+  - name: Edit Rsyslog config file /etc/rsyslog.conf
+    replace: 
+      path: /etc/rsyslog.conf
+      regexp: '^#\$ModLoad imudp'
+      replace: $ModLoad imudp
+        
+  - name: Edit Rsyslog config file /etc/rsyslog.conf
+    replace: 
+      path: /etc/rsyslog.conf
+      regexp: '^#\$UDPServerRun 514'
+      replace: $UDPServerRun 514
+        
+  - name: Edit Rsyslog config file /etc/rsyslog.conf
+    replace: 
+      path: /etc/rsyslog.conf
+      regexp: '^#\$ModLoad imtcp'
+      replace: $ModLoad imtcp
+        
+  - name: Edit Rsyslog config file /etc/rsyslog.conf
+    replace: 
+      path: /etc/rsyslog.conf
+      regexp: '^#\$InputTCPServerRun 514'
+      replace: $InputTCPServerRun 514
 
   - name: Edit Rsyslog config file /etc/rsyslog.conf
     lineinfile: 
       dest: /etc/rsyslog.conf
-      regexp: '^'
       insertafter: EOF
       line: "\n# Add remote logs\n$template RemoteLogs,\"/var/log/rsyslog/%HOSTNAME%/%PROGRAMNAME%.log\"\n*.* ?RemoteLogs"
       state: present
     notify:
       - Rsyslog Restart
+    
+# Отроем порт TCP 60, для этого уберем значки комментария в файле /etc/audit/auditd.conf
+  - name: Edit Audit config file /etc/audit/auditd.conf
+    replace: 
+      path: /etc/audit/auditd.conf
+      regexp: '^#tcp_listen_port = 60'
+      replace: tcp_listen_port = 60
+    notify:
+      - Auditd Restart
 
   when: ansible_hostname == "log"
 
