@@ -11,4 +11,4 @@
   service: name=rsyslog.service state=restarted
 
 - name: Auditd Restart
-  service: name=auditd.service state=restarted
+  service: name=auditd state=restarted use=service

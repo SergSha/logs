@@ -53,35 +53,39 @@
     lineinfile: 
       dest: /etc/audit/rules.d/audit.rules
       insertafter: EOF
-      line: "\n-w /etc/nginx/nginx.conf -p wa -k nginx_conf\n-w /etc/nginx/default.d/ -p wa -k nginx_conf"
+      line: "-w /etc/nginx/nginx.conf -p wa -k nginx_conf\n-w /etc/nginx/default.d/ -p wa -k nginx_conf"
       state: present
 
 # Найдем и поменяем следующие строки в файле /etc/audit/auditd.conf    
   - name: Edit Audit config file /etc/audit/auditd.conf
-    replace: 
+    lineinfile: 
       path: /etc/audit/auditd.conf
-      regexp: '^log_format'
-      replace: log_format = RAW
+      regexp: '^(.*)log_format(.*)$'
+      line: 'log_format = RAW'
+      backrefs: yes
 
   - name: Edit Audit config file /etc/audit/auditd.conf
-    replace: 
+    lineinfile: 
       path: /etc/audit/auditd.conf
-      regexp: '^name_format'
-      replace: name_format = HOSTNAME
+      regexp: '^(.*)name_format(.*)$'
+      line: 'name_format = HOSTNAME'
+      backrefs: yes
 
 # В файле /etc/audisp/plugins.d/au-remote.conf поменяем параметр active на yes
   - name: Edit Audit-plugins config file /etc/audisp/plugins.d/au-remote.conf
-    replace: 
+    lineinfile: 
       path: /etc/audisp/plugins.d/au-remote.conf
-      regexp: '^active = no'
-      replace: active = yes
+      regexp: '^(.*)active = no(.*)$'
+      line: 'active = yes'
+      backrefs: yes
       
 # В файле /etc/audisp/audisp-remote.conf требуется указать адрес сервера и порт, на который будут отправляться логи
   - name: Edit Audit-plugins config file /etc/audisp/audisp-remote.conf
-    replace: 
+    lineinfile: 
       path: /etc/audisp/audisp-remote.conf
-      regexp: '^remote_server'
-      replace: remote_server = 192.168.50.15
+      regexp: '^(.*)remote_server(.*)$'
+      line: 'remote_server = 192.168.50.15'
+      backrefs: yes
     notify: Auditd Restart
 
   when: ansible_hostname == "web"
