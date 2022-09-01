@@ -247,11 +247,11 @@ Hint: Some lines were ellipsized, use -l to show in full.
 <p>Также работу nginx можно проверить на хосте с помощью команды curl:</p>
 
 <pre>[root@web ~]# curl localhost
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-  <title>Welcome to CentOS</title>
-  <style rel="stylesheet" type="text/css">
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Welcome to CentOS&lt;/title&gt;
+  &lt;style rel="stylesheet" type="text/css"&gt;
 
         html {
         background-image:url(img/html-background.png);
@@ -339,7 +339,7 @@ Hint: Some lines were ellipsized, use -l to show in full.
         text-align: right;
     }
 
-    ul.mainlinks > li {
+    ul.mainlinks &gt; li {
     border-right: 1px dotted #ddd;
     padding-right: 10px;
     padding-left: 10px;
@@ -347,62 +347,62 @@ Hint: Some lines were ellipsized, use -l to show in full.
     list-style: none;
     }
 
-    ul.mainlinks > li.last,
-    ul.mainlinks > li.first {
+    ul.mainlinks &gt; li.last,
+    ul.mainlinks &gt; li.first {
     border-right: none;
     }
 
-  </style>
+  &lt;/style&gt;
 
-</head>
+&lt;/head&gt;
 
-<body>
+&lt;body&gt;
 
-<div id="header">
+&lt;div id="header"&gt;
 
-    <ul class="mainlinks">
-        <li> <a href="http://www.centos.org/">Home</a> </li>
-        <li> <a href="http://wiki.centos.org/">Wiki</a> </li>
-        <li> <a href="http://wiki.centos.org/GettingHelp/ListInfo">Mailing Lists</a></li>
-        <li> <a href="http://www.centos.org/download/mirrors/">Mirror List</a></li>
-        <li> <a href="http://wiki.centos.org/irc">IRC</a></li>
-        <li> <a href="https://www.centos.org/forums/">Forums</a></li>
-        <li> <a href="http://bugs.centos.org/">Bugs</a> </li>
-        <li class="last"> <a href="http://wiki.centos.org/Donate">Donate</a></li>
-    </ul>
+    &lt;ul class="mainlinks"&gt;
+        &lt;li&gt; &lt;a href="http://www.centos.org/"&gt;Home&lt;/a&gt; &lt;/li&gt;
+        &lt;li&gt; &lt;a href="http://wiki.centos.org/"&gt;Wiki&lt;/a&gt; &lt;/li&gt;
+        &lt;li&gt; &lt;a href="http://wiki.centos.org/GettingHelp/ListInfo"&gt;Mailing Lists&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt; &lt;a href="http://www.centos.org/download/mirrors/"&gt;Mirror List&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt; &lt;a href="http://wiki.centos.org/irc"&gt;IRC&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt; &lt;a href="https://www.centos.org/forums/"&gt;Forums&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt; &lt;a href="http://bugs.centos.org/"&gt;Bugs&lt;/a&gt; &lt;/li&gt;
+        &lt;li class="last"&gt; &lt;a href="http://wiki.centos.org/Donate"&gt;Donate&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
 
-        <div class="logo">
-                <a href="http://www.centos.org/"><img src="img/centos-logo.png" border="0"></a>
-        </div>
+        &lt;div class="logo"&gt;
+                &lt;a href="http://www.centos.org/"&gt;&lt;img src="img/centos-logo.png" border="0"&gt;&lt;/a&gt;
+        &lt;/div&gt;
 
-</div>
+&lt;/div&gt;
 
-<div id="content">
+&lt;div id="content"&gt;
 
-        <h1>Welcome to CentOS</h1>
+        &lt;h1&gt;Welcome to CentOS&lt;/h1&gt;
 
-        <h2>The Community ENTerprise Operating System</h2>
+        &lt;h2&gt;The Community ENTerprise Operating System&lt;/h2&gt;
 
-        <p><a href="http://www.centos.org/">CentOS</a> is an Enterprise-class Linux Distribution derived from sources freely provided
+        &lt;p&gt;&lt;a href="http://www.centos.org/"&gt;CentOS&lt;/a&gt; is an Enterprise-class Linux Distribution derived from sources freely provided
 to the public by Red Hat, Inc. for Red Hat Enterprise Linux.  CentOS conforms fully with the upstream vendors
 redistribution policy and aims to be functionally compatible. (CentOS mainly changes packages to remove upstream vendor
-branding and artwork.)</p>
+branding and artwork.)&lt;/p&gt;
 
-        <p>CentOS is developed by a small but growing team of core
+        &lt;p&gt;CentOS is developed by a small but growing team of core
 developers.&nbsp; In turn the core developers are supported by an active user community
-including system administrators, network administrators, enterprise users, managers, core Linux contributors and Linux enthusiasts from around the world.</p>
+including system administrators, network administrators, enterprise users, managers, core Linux contributors and Linux enthusiasts from around the world.&lt;/p&gt;
 
-        <p>CentOS has numerous advantages including: an active and growing user community, quickly rebuilt, tested, and QA'ed errata packages, an extensive <a href="http://www.centos.org/download/mirrors/">mirror network</a>, developers who are contactable and responsive, Special Interest Groups (<a href="http://wiki.centos.org/SpecialInterestGroup/">SIGs</a>) to add functionality to the core CentOS distribution, and multiple community support avenues including a <a href="http://wiki.centos.org/">wiki</a>, <a
-href="http://wiki.centos.org/irc">IRC Chat</a>, <a href="http://wiki.centos.org/GettingHelp/ListInfo">Email Lists</a>, <a href="https://www.centos.org/forums/">Forums</a>, <a href="http://bugs.centos.org/">Bugs Database</a>, and an <a
-href="http://wiki.centos.org/FAQ/">FAQ</a>.</p>
+        &lt;p&gt;CentOS has numerous advantages including: an active and growing user community, quickly rebuilt, tested, and QA'ed errata packages, an extensive &lt;a href="http://www.centos.org/download/mirrors/"&gt;mirror network&lt;/a&gt;, developers who are contactable and responsive, Special Interest Groups (&lt;a href="http://wiki.centos.org/SpecialInterestGroup/"&gt;SIGs&lt;/a&gt;) to add functionality to the core CentOS distribution, and multiple community support avenues including a &lt;a href="http://wiki.centos.org/"&gt;wiki&lt;/a&gt;, &lt;a
+href="http://wiki.centos.org/irc"&gt;IRC Chat&lt;/a&gt;, &lt;a href="http://wiki.centos.org/GettingHelp/ListInfo"&gt;Email Lists&lt;/a&gt;, &lt;a href="https://www.centos.org/forums/"&gt;Forums&lt;/a&gt;, &lt;a href="http://bugs.centos.org/"&gt;Bugs Database&lt;/a&gt;, and an &lt;a
+href="http://wiki.centos.org/FAQ/"&gt;FAQ&lt;/a&gt;.&lt;/p&gt;
 
-        </div>
+        &lt;/div&gt;
 
-</div>
+&lt;/div&gt;
 
 
-</body>
-</html>
+&lt;/body&gt;
+&lt;/html&gt;
 [root@web ~]#</pre>
 
 <p>Также работу nginx можно проверить в браузере, ввведем в адерсную строку http://192.168.50.10</p>
