@@ -25,14 +25,14 @@ Vagrant.configure("2") do |config|
     config.vm.define opts[:name] do |config|
       config.vm.hostname = opts[:name]
       config.vm.network "private_network", ip: opts[:ip]
-	  if opts[:name] == boxes.last[:name]
+      if opts[:name] == boxes.last[:name]
         config.vm.provision "ansible" do |ansible|
-          ansible.playbook = "ansible/provision.yml"
-          ansible.inventory_path = "ansible/hosts"
-          ansible.host_key_checking = "false"
+          ansible.playbook = "playbook.yml"
+#          ansible.inventory_path = "hosts"
+#          ansible.host_key_checking = "false"
           ansible.limit = "all"
         end
-	  end
+      end
     end
   end
 end

@@ -11,4 +11,5 @@
   service: name=rsyslog.service state=restarted
 
 - name: Auditd Restart
-  service: name=auditd state=restarted use=service
+  command: /sbin/service auditd restart
+  when: ansible_distribution_major_version == "7"
