@@ -407,7 +407,7 @@ href="http://wiki.centos.org/FAQ/">FAQ</a>.</p>
 
 <p>Также работу nginx можно проверить в браузере, ввведем в адерсную строку http://192.168.50.10</p>
 
-![image](https://user-images.githubusercontent.com/96518320/187977967-fc483436-82a7-45c3-a135-82a1bbffc094.png)
+![image](https://user-images.githubusercontent.com/96518320/187984451-7230f473-33ea-41fb-9bd8-3a659c197f47.png)
 
 <p>Наблюдаем, что nginx запустился и работает корректно.</p>
 
