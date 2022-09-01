@@ -405,6 +405,10 @@ href="http://wiki.centos.org/FAQ/">FAQ</a>.</p>
 </html>
 [root@web ~]#</pre>
 
+<p>Также работу nginx можно проверить в браузере, ввведем в адерсную строку http://192.168.50.10</p>
+
+![image](https://user-images.githubusercontent.com/96518320/187977967-fc483436-82a7-45c3-a135-82a1bbffc094.png)
+
 <p>Наблюдаем, что nginx запустился и работает корректно.</p>
 
 <h4>3. Настройка центрального сервера сбора логов</h4>
@@ -542,40 +546,19 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful
 <pre>[root@web ~]# rm -f /usr/share/nginx/html/img/header-background.png
 [root@web ~]#</pre>
 
-<p>Попробуем несколько раз зайти по адресу http://192.168.50.10:</p>
-
-<pre>[root@web ~]# curl 192.168.50.10
-...</pre>
-
-<pre>[root@web ~]# curl 192.168.50.10
-...</pre>
-
-<pre>[root@web ~]# curl 192.168.50.10
-...</pre>
-
-<p>Далее заходим на сервер log и смотрим информацию об nginx:</p>
-
-<pre>[root@log ~]# cat /var/log/rsyslog/web/nginx_access.log
-Aug 31 12:11:10 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:10 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
-Aug 31 12:11:15 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:15 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
-Aug 31 12:11:19 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:19 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
-
-Aug 31 12:23:39 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:23:39 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
-Aug 31 12:24:09 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:24:09 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
-Aug 31 12:24:16 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:24:16 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
-
-[root@log ~]#</pre>
+<p>Попробуем несколько раз зайти по адресу http://192.168.50.10,<br />
+далее заходим на сервер log и смотрим информацию об nginx:</p>
 
 <pre>[root@log ~]# cat /var/log/rsyslog/web/nginx_error.log
-Aug 31 12:11:10 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:10 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
-Aug 31 12:11:15 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:15 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
-Aug 31 12:11:19 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:11:19 +0300] "GET / HTTP/1.1" 200 4833 "-" "curl/7.29.0"
+Aug 31 12:11:10 web nginx_error: 2022/09/01 12:11:10 [error] 4407#4407: *2 open() "/usr/share/nginx/html/favicon.ico" failed (2: No such file or directory), client: 192.168.50.1, server: _, request: "GET /favicon.ico HTTP/1.1", host: "192.168.50.10", referrer: "http://192.168.50.10/"</pre>
 
-Aug 31 12:23:39 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:23:39 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
-Aug 31 12:24:09 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:24:09 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
-Aug 31 12:24:16 web nginx_access: 192.168.50.10 - - [31/Aug/2022:12:24:16 +0300] "GET / HTTP/1.0" 200 4833 "-" "Lynx/2.8.8dev.15 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.0.1e-fips"
-
-[root@log ~]#</pre>
+<pre>[root@log ~]# cat /var/log/rsyslog/web/nginx_access.log
+Aug 31 12:11:10 web nginx_access: 192.168.50.1 - - [01/Aug/2022:12:11:10 +0300] "GET / HTTP/1.1" 200 4833 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
+Aug 31 12:11:10 web nginx_access: 192.168.50.1 - - [31/Aug/2022:12:11:10 +0300] "GET /img/centos-logo.png HTTP/1.1" 200 3030 "http://192.168.50.10/" "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
+Aug 31 12:11:10 web nginx_access: 192.168.50.1 - - [31/Aug/2022:12:11:10 +0300] "GET /img/html-background.png HTTP/1.1" 200 1801 "http://192.168.50.10/" "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
+Aug 31 12:11:10 web nginx_access: 192.168.50.1 - - [31/Aug/2022:12:11:10 +0300] "GET /img/header-background.png HTTP/1.1" 404 3650 "http://192.168.50.10/" "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
+Aug 31 12:11:10 web nginx_access: 192.168.50.1 - - [31/Aug/2022:12:11:10 +0300] "GET /favicon.ico HTTP/1.1" 404 3650 "http://192.168.50.10/" "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
+</pre>
 
 <p>Видим, что логи отправляются корректно.</p>
 
